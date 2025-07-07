@@ -23,17 +23,6 @@ import { initSocket } from "./utility/socket";
 dotenv.config();
 
 const app: Express = express();
-// const server = http.createServer(app);
-// Initialize socket.io and set up a basic connection event
-// const io = initSocket(server);
-// io.on("connection", (socket) => {
-//   console.log("A user connected");
-//   socket.on("disconnect", () => {
-//     console.log("A user disconnected");
-//   });
-// });
-
-// const version = process.env.VERSION || "v1"; // Default to v1 if VERSION is not set
 
 const corsOptions: CorsOptions = {
   origin: (origin: string | undefined, callback: any) => {
