@@ -7,6 +7,7 @@ const activitySchema = new Schema({
   primaryText: { type: String },
   secondaryText: { type: String },
   createdAt: { type: Date, default: Date.now },
+  usersToInform: [{ type: String }],
 });
 
 export const Activity = model("Activity", activitySchema);

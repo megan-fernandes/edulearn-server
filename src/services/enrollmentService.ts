@@ -12,6 +12,8 @@ import {
   IRateCourse,
   IUpdateProgress,
 } from "../utility/types/enrollment.types";
+import { publishNotification } from "../utility/connection";
+import { INotificationMessage } from "../utility/types/activity.types";
 
 export class EnrollmentServices {
   public async enrollStudent(data: IEnrollStudent) {
@@ -235,6 +237,17 @@ export class EnrollmentServices {
       const totalStudents = findCourse.studentsEnrolled.length;
       findCourse.rating = totalStudents > 0 ? totalRatings / totalStudents : 0;
       await findCourse.save();
+
+      const message: INotificationMessage = {
+        heading: "Course Rated!!",
+        createdAt: new Date(),
+        type: "courseRated",
+        courseTitle: findCourse.title as string, // Ensure title is a string
+        instructorId: findCourse.instructor?.toString() || "", // Convert instructor to string or fallback to empty string
+        recipients: [],
+      };
+
+      await publishNotification("notifications", message);
 
       return {
         success: true,

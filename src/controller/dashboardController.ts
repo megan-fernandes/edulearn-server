@@ -35,3 +35,33 @@ export const instructorDashboard = async (req: Request, res: Response) => {
     }
   }
 };
+
+export const studentDashboard = async (req: Request, res: Response) => {
+  try {
+    const user = req.user;
+    if (!user) throw new HTTPError("Unaothorised", 401);
+
+    const studentDash = await dashObj.dashboardStudent(user);
+    const code = studentDash.success ? 200 : 400;
+    res
+      .status(httpStatusCodes[code].code)
+      .json(Helpers.formResponse(httpStatusCodes[code].code, studentDash));
+  } catch (err) {
+    console.log("Error=>", err);
+    if (err instanceof HTTPError) {
+      const errorData = err.details || err.message;
+      res
+        .status(httpStatusCodes[err.code].code)
+        .json(Helpers.formResponse(httpStatusCodes[err.code].code, errorData));
+    } else {
+      res
+        .status(httpStatusCodes[500].code)
+        .json(
+          Helpers.formResponse(
+            httpStatusCodes[500].code,
+            "Internal server error"
+          )
+        );
+    }
+  }
+};

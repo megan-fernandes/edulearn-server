@@ -76,10 +76,14 @@ export const allowedOrigins: string[] = [
   `http://localhost:3000`,
   `http://localhost:5173`,
   `http://172.30.232.130:3000`,
-  `http://192.168.226.180:3000`,
+  `http://192.168.127.180:3000`,
   "https://api.stripe.com",
+  "https://d537cc23bf71.ngrok-free.app",
 ];
 
 //endpoint secrets stripe
 
-export const paymentSuccessKey = process.env.PAYMENT_SUCCESS_WEBHOOK_SECRET as string
+export const paymentSuccessKey = process.env
+  .PAYMENT_SUCCESS_WEBHOOK_SECRET as string;
+
+// export const RABBIT_URL = `amqp://${rmqUser}:${rmqPass}@${rmqhost}:5672`;

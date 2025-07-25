@@ -113,7 +113,7 @@
       "config/multerConfig.ts",
       "package.json",
       "prisma/*"
-      // "package-lock.json"
+, "test"      // "package-lock.json"
     ],
     "exclude": ["node_modules"]
   }

@@ -110,11 +110,17 @@ export const userGoogleSuccess = async (req: Request, res: Response) => {
 
     const registerGoogleUser = await authObj.loginGoogleUser(reqData);
     const code = registerGoogleUser.success ? 200 : 400;
-    res
-      .status(httpStatusCodes[code].code)
-      .json(
-        Helpers.formResponse(httpStatusCodes[code].code, registerGoogleUser)
-      );
+    if (code === 200) {
+      const encodedData = JSON.stringify(registerGoogleUser.data);
+      console.log("ENCODED DATA:::", encodedData);
+      res.redirect(`http://localhost:5173/google-callback?data=${encodedData}`);
+    } else {
+      res
+        .status(httpStatusCodes[code].code)
+        .json(
+          Helpers.formResponse(httpStatusCodes[code].code, registerGoogleUser)
+        );
+    }
   } catch (err) {
     console.log("Error=>", err);
     if (err instanceof HTTPError) {

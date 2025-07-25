@@ -17,10 +17,14 @@ import session from "express-session";
 import passport from "passport";
 import dotenv from "dotenv";
 import helmet from "helmet";
+import compression from "compression";
+import morgan from "morgan";
+import fs from "fs";
 import "socket.io";
-// import http from "http";
 import { initSocket } from "./utility/socket";
+import { consumeNotifications } from "./utility/connection";
 dotenv.config();
+// import https from "https"
 
 const app: Express = express();
 
@@ -51,9 +55,34 @@ app.use((req, res, next) => {
   }
 });
 
+//generate a log file for every-month
+const filePath = (() => {
+  const logDir = `${__dirname}/Logs`;
+  const currentMonthYear = new Date()
+    .toLocaleString("default", {
+      month: "2-digit",
+      year: "numeric",
+    })
+    .replace("/", "-"); // Format as MM-YYYY
+  const logFilePath = `${logDir}/${currentMonthYear}.log`;
+
+  if (!fs.existsSync(logDir)) {
+    fs.mkdirSync(logDir, { recursive: true }); // Create Logs directory if it doesn't exist
+  }
+
+  if (!fs.existsSync(logFilePath)) {
+    fs.writeFileSync(logFilePath, ""); // Create the log file if it doesn't exist
+  }
+
+  return logFilePath;
+})();
+const accessLogStream = fs.createWriteStream(filePath, { flags: "a" });
+
 app.use(cors(corsOptions));
 app.disable("x-powered-by");
 app.use(helmet());
+app.use(compression());
+app.use(morgan("combined", { stream: accessLogStream }));
 // //CSRF Token and cookie parsing
 
 // app.use(
@@ -70,6 +99,7 @@ app.use(helmet());
 // });
 
 //passport for oauth
+
 app.use(cookieParser());
 app.use(
   session({
@@ -82,36 +112,48 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 //Databse Connection
+// mongoConnect()
+//   .then(() => {
+//     console.log("Connected to the database successfully!");
+//     const server = app.listen(port, () => {
+//       console.log(`Server started on port ${port}!!`);
+//     });
+//     const io = initSocket(server);
+//     io.on("connection", (socket: any) => {
+//       console.log(`\n=======================\nUser connected: ${socket.id}`);
+
+//       //join a room using chatId
+//       socket.on("joinRoom", (roomId: string) => {
+//         socket.join(roomId);
+//         console.log(`Socket ${socket.id} joined room ${roomId}`);
+//       });
+
+//       socket.on("leaveRoom", (roomId: string) => {
+//         socket.leave(roomId);
+//         console.log(`Socket ${socket.id} left room ${roomId}`);
+//       });
+
+//       // Handle disconnection
+//       socket.on("disconnect", () => {
+//         console.log(`User disconnected: ${socket.id}`);
+//       });
+//     });
+//   })
+//   .catch((error) => {
+//     console.error("Failed to connect to the database:", error);
+//   });
 mongoConnect()
   .then(() => {
     console.log("Connected to the database successfully!");
     const server = app.listen(port, () => {
       console.log(`Server started on port ${port}!!`);
     });
-    const io = initSocket(server);
-    io.on("connection", (socket: any) => {
-      console.log(`\n=======================\nUser connected: ${socket.id}`);
-
-      //join a room using chatId
-      socket.on("joinRoom", (roomId: string) => {
-        socket.join(roomId);
-        console.log(`Socket ${socket.id} joined room ${roomId}`);
-      });
-
-      socket.on("leaveRoom", (roomId: string) => {
-        socket.leave(roomId);
-        console.log(`Socket ${socket.id} left room ${roomId}`);
-      });
-
-      // Handle disconnection
-      socket.on("disconnect", () => {
-        console.log(`User disconnected: ${socket.id}`);
-      });
-    });
+    initSocket(server);
   })
   .catch((error) => {
     console.error("Failed to connect to the database:", error);
   });
+consumeNotifications();
 
 //routes
 app.use(baseRoute, authRoute);

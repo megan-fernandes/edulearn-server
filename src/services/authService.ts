@@ -1,11 +1,10 @@
 import { resetPasswordLinkExp, Role, salt } from "../constants";
 import { User } from "../models/user";
 import { catchError } from "../utility/catchBlock";
-import { UserRoleMapping } from "../utility/helpers";
 import HTTPError from "../utility/httpError";
 import { generateAccessToken, generateRefreshToken } from "../utility/tokens";
 import {
-  IGoogleUserData,
+  // IGoogleUserData,
   ILoginUser,
   IRegisterUser,
   IResetPassword,
@@ -65,7 +64,7 @@ export class AuthServices {
       throw catchError(error);
     }
   }
-  
+
   public async LoginUser(data: ILoginUser) {
     try {
       const { email, password, role } = data;
@@ -113,26 +112,34 @@ export class AuthServices {
 
   public async loginGoogleUser(ReqData: any) {
     try {
-      const user: IGoogleUserData = ReqData._json;
-      if (!user || !user.email_verified)
-        throw new HTTPError("Not authorised", 403);
+      const { _id, fullName, email, role } = ReqData;
+      // const user: IGoogleUserData = ReqData._json;
+      // console.log("GOOGLE USER OBJECT:", user);
+      // if (!user || !user.email_verified)
+      //   throw new HTTPError("Not authorised", 403);
 
-      const { email } = user;
+      // const { email } = user;
       const findUser = await User.findOne({
         email,
-        role: UserRoleMapping.student,
+        role: role.toString() as Role,
       });
       if (!findUser)
         throw new HTTPError("User with email and role does not exist", 404);
 
-      //generate AT and RT
+      // //generate AT and RT
+      // const tokenData = {
+      //   email,
+      //   fullName: findUser.fullName,
+      //   role: Role["student"],
+      //   id: findUser._id.toString(),
+      // };
+
       const tokenData = {
         email,
-        fullName: findUser.fullName,
-        role: Role["student"],
-        id: findUser._id.toString(),
+        fullName,
+        role: role.toString() as Role,
+        id: _id.toString(),
       };
-
       const accessToken = generateAccessToken(tokenData);
       const refreshToken = generateRefreshToken(tokenData);
 
@@ -143,8 +150,12 @@ export class AuthServices {
       return {
         success: true,
         data: {
-          ...findUser,
+          userData: {
+            ...tokenData,
+            profile: findUser.profile,
+          },
           accessToken,
+          refreshToken,
         },
       };
     } catch (error: unknown) {

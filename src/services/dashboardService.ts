@@ -4,6 +4,7 @@ import { catchError } from "../utility/catchBlock";
 import { ITokenData } from "../utility/types/auth.types";
 import { IGetCommon } from "../utility/types/common.types";
 import { CourseServices } from "./courseService";
+import { EnrollmentServices } from "./enrollmentService";
 // import HTTPError from "../utility/httpError";
 
 export class dashboardServices {
@@ -41,6 +42,30 @@ export class dashboardServices {
             totalCourses: courseIds.length,
             totalStudents: totalStudents[0].studentCount,
             averageRating: averageRating[0]?.averageRating || 0.0,
+          },
+        },
+      };
+    } catch (error: unknown) {
+      throw catchError(error);
+    }
+  }
+  public async dashboardStudent(user: ITokenData) {
+    try {
+      const fetchEnrollments =
+        await new EnrollmentServices().studentEnrolledCourses(
+          { page: 1 },
+          user
+        );
+      const completed = fetchEnrollments.data.courses.map((course) => {
+        if (course.completionPercentage == 100) return course;
+      });
+
+      return {
+        success: true,
+        data: {
+          cards: {
+            totalEnrollments: fetchEnrollments.data.courses.length,
+            completed: completed.length,
           },
         },
       };

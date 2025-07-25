@@ -23,6 +23,12 @@ chapterSchema.pre(
   async function (next) {
     const chapter = this;
     await Promise.all([
+      mongoose
+        .model("Enrollment")
+        .updateMany(
+          { completedMaterials: { $in: [chapter.lectures] } },
+          { $pull: { completedMaterials: chapter.lectures } }
+        ),
       mongoose.model("Lecture").deleteMany({ _id: { $in: chapter.lectures } }),
       mongoose
         .model("Course")
