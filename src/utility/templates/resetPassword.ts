@@ -8,7 +8,7 @@ export const resetPassword = `<!DOCTYPE html>
   <body>
     <p>Dear {{fullName}},</p>
     <p>Please find below your link for resetting the password to your account. This link is valid for the next 60 minutes </p>
-    <p>OTP: {{resetLink}}</p><br/><br/>
+    <p>Link: {{resetLink}}</p><br/><br/>
     
     <p>Regards,<br/>
       EduLearn Team <br/>

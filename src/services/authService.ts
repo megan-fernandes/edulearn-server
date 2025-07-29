@@ -240,7 +240,7 @@ export class AuthServices {
 
       const data = {
         fullName: findUser.fullName,
-        resetLink: `http://localhost:3000/api/v1/auth/password-reset/${token}`, //TODO: Change this to front end link
+        resetLink: `http://localhost:5173/reset-password/${token}`, //TODO: Change this to front end link
       };
 
       //generate link and send
